@@ -20,6 +20,7 @@ All entries below were accepted on 2026-10-04, before any code was written.
 | [D-012](#d-012-poll-historylist-no-pubsub-push) | Poll `history.list`; no Pub/Sub push |
 | [D-013](#d-013-a-per-account-quota-limiter-in-front-of-every-api-call) | A per-account quota limiter in front of every API call |
 | [D-014](#d-014-measure-ram-after-milestone-1-and-stop-if-it-is-not-clearly-better) | Measure RAM after milestone 1 and stop if it is not clearly better |
+| [D-015](#d-015-the-s0-spike-calls-gmailservice-directly) | The S0 spike calls `GmailService` directly |
 
 ---
 
@@ -193,3 +194,18 @@ All entries below were accepted on 2026-10-04, before any code was written.
 **Decision.** Milestone 1 is a read-only prototype that ends with a measurement against the official Gmail tabs, using the protocol and thresholds in `docs/MILESTONE_1.md`. Compose and actions are not started until the measurement passes.
 
 **Why.** Compose, actions and polish are most of the work. They are not worth building on a foundation that does not deliver the saving.
+
+## D-015 The S0 spike calls `GmailService` directly
+
+*Accepted 2026-10-04, session S1.*
+
+**Context.** Hard rule 7 says every Gmail call goes through the quota limiter and no code uses `GmailService` outside the gateway. The S0 spike in `tools/Spike/` exists to dump raw API responses, which is what the gateway is designed to hide.
+
+**Decision.** `tools/Spike/` is exempt from hard rule 7. It uses `GmailService` directly and reads raw response bodies with `ExecuteAsStreamAsync`. Every other rule still applies to it: `gmail.readonly` only, get and list methods only, and output written outside the repo with mode 600.
+
+**Why.** Its calls are few, sequential and started by hand, far below 6,000 units per minute. Routing them through the gateway would mean adding raw-JSON methods to it that the app never needs.
+
+**Consequences.** `SourceRulesTests` checks B1 and B2 against `tools/` as well as `src/`, but checks only `src/` for direct Google API use.
+
+**Revisit if** the spike grows into something that runs unattended or in loops.
+

@@ -54,13 +54,14 @@ docs/                  architecture, API notes, milestone spec, runbooks
 
 ## Commands
 
-Fill in once the solution exists.
-
 ```sh
 dotnet build
 dotnet test
-dotnet run --project src/Mailpane.Web
+dotnet run --project src/Mailpane.Web          # http://localhost:8425/
+dotnet run --project tools/Spike               # S0 discovery spike; prints its commands
 ```
+
+To run against scratch directories instead of the real ones: `Mailpane__DataDir=/tmp/x Mailpane__ConfigDir=/tmp/y dotnet run --project src/Mailpane.Web`.
 
 ## Local paths
 

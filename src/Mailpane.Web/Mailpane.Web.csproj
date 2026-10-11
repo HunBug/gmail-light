@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <!-- ARCHITECTURE.md 11: workstation, non-concurrent GC. Q-07 measures the effect. -->
+    <ServerGarbageCollection>false</ServerGarbageCollection>
+    <ConcurrentGarbageCollection>false</ConcurrentGarbageCollection>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Mailpane.Core\Mailpane.Core.csproj" />
+    <ProjectReference Include="..\Mailpane.Gmail\Mailpane.Gmail.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Served from the output directory in every environment, not only Development. -->
+    <Content Update="wwwroot\**" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="Mailpane.Tests" />
+  </ItemGroup>
+
+</Project>

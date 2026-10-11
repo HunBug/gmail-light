@@ -97,6 +97,37 @@ Sources: secondary, quoting Google's "Manage App Audience" page: "Authorizations
 
 Source: Zero's README registers `http://localhost:8787/api/auth/callback/google` on a Web application client. Not checked against Google's own page.
 
+### V-08 [DISCOVERY] Google.Apis.Auth 1.75: offline access is the default; consent prompt is settable
+
+Source: the XML documentation shipped in the `Google.Apis.Auth` 1.75.0 NuGet package, read 2026-10-04 (session S1).
+
+- `GoogleAuthorizationCodeRequestUrl.AccessType` defaults to `offline`.
+- `GoogleAuthorizationCodeFlow.Initializer.Prompt` takes `null`, `none`, `consent` or `select_account`. mailpane sets `consent`.
+- `GoogleClientSecrets.FromFile` reads the downloaded client JSON. The library is expected to accept both the `web` and the `installed` shapes; that part is **unverified** until the spike runs.
+
+This settles the library side of Q-08. Whether Google really returns a refresh token every time is checked by the spike's `auth` command, which prints it.
+
+### V-09 [DISCOVERY] Idle backend RSS is about 100 MB, and GC settings make no difference at idle
+
+Measured 2026-10-04 (session S1) with `ps -o rss=`: Release build, .NET 10.0.112, workstation non-concurrent GC, `InvariantGlobalization`, no accounts, 15 s after 20 page requests.
+
+| Setting | RSS |
+|---|---|
+| defaults as configured | 100 MB |
+| `DOTNET_TieredPGO=0` | 100 MB |
+| `DOTNET_GCConserveMemory=9` | 100 MB |
+| both, plus `DOTNET_TC_QuickJitForLoops=1` | 100 MB |
+| `DOTNET_GCgen0size=0x200000` | 100 MB |
+
+At idle the managed heap is tiny, so most of the RSS is the runtime, JIT-compiled code and mapped assemblies. GC settings can only matter under load (S7). If the backend turns out too heavy, the levers that remain are ReadyToRun, trimming and Native AOT (D-004). First data point for Q-07.
+
+### V-10 [DISCOVERY] ASP.NET Core request logging records full URLs, and appsettings.json depends on the working directory
+
+Verified 2026-10-04 (session S1) by running the Release binary from the repo root.
+
+- With the working directory elsewhere, the default content root is the working directory, so `appsettings.json` and `wwwroot` are not found. Every request was then logged at Information with its full URL, which would include `/oauth/callback?code=...` and search queries, a B7 violation.
+- Fixed by pinning `ContentRootPath` to `AppContext.BaseDirectory`, setting the `Microsoft.AspNetCore` log filter to Warning in code, and copying `wwwroot` to the build output. `WebSafetyTests.Logs_contain_no_codes_tokens_or_addresses` guards it; it was checked to fail when the filter is removed.
+
 ---
 
 ## Dead ends
@@ -157,9 +188,13 @@ With `sandbox="allow-same-origin"` and no `allow-scripts`, can the parent page r
 
 What is the RSS of an idle ASP.NET Core Razor Pages process on .NET 10 with workstation, non-concurrent GC? What does it reach after an hour of use with three accounts? Settings to try: `ServerGarbageCollector=false`, `ConcurrentGarbageCollection=false`, `TieredPGO` off, `DOTNET_GCConserveMemory`, `InvariantGlobalization`. Answer in sessions S1 and S7.
 
+*Partly answered (S1):* idle RSS is about 100 MB, and the settings above make no difference at idle (V-09). The figure under load with three accounts is still open.
+
 ### Q-08 [OPEN QUESTION] OAuth client type
 
 "Web application" with a registered `http://localhost:8425/oauth/callback` (default plan) or "Desktop app" with a loopback redirect? Check which the .NET library's `GoogleAuthorizationCodeFlow` handles most simply when the backend itself receives the callback, and how to force `access_type=offline` and `prompt=consent` so a refresh token is always returned.
+
+*Partly answered (S1):* the library side is settled (V-08). The code assumes a Web application client, as `docs/OAUTH_SETUP.md` describes. Still open: confirming that Google returns a refresh token on every consent. The spike's `auth` command prints this.
 
 ### Q-09 [OPEN QUESTION] Google Workspace accounts
 

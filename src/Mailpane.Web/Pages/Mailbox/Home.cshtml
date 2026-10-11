@@ -1,0 +1,18 @@
+@page "/{slug}/"
+@model HomeModel
+@{
+    ViewData["Title"] = $"{Model.Account.Slug} - mailpane";
+    ViewData["Slug"] = Model.Account.Slug;
+    ViewData["AccountClass"] = AccountColor.CssClass(Model.Account.Color);
+}
+@* Placeholder until S2 builds the label sidebar and S3 the thread list. *@
+<h1>@Model.Account.Email</h1>
+@if (Model.Profile is { } p)
+{
+    <p>Connected. @p.ThreadsTotal.ToString("N0") threads, @p.MessagesTotal.ToString("N0") messages.</p>
+}
+else
+{
+    <p class="error">@Model.Error</p>
+}
+<p class="muted">Granted scope: <code>@Model.Account.Scopes</code></p>

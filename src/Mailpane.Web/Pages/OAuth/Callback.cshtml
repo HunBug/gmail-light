@@ -1,0 +1,8 @@
+@page "/oauth/callback"
+@model CallbackModel
+@{
+    ViewData["Title"] = "Account not added - mailpane";
+}
+<h1>The account was not added</h1>
+<p class="error">@Model.Message</p>
+<p><a href="/accounts/add">Try again</a> &middot; <a href="/">Accounts</a></p>

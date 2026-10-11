@@ -1,0 +1,34 @@
+@page "/"
+@model IndexModel
+@{
+    ViewData["Title"] = "mailpane";
+}
+<h1>Accounts</h1>
+
+@if (!Model.OAuthConfigured)
+{
+    <p class="error">No OAuth client yet. Save it as <code>@Model.ClientSecretFile</code> (see <code>docs/OAUTH_SETUP.md</code>), then reload.</p>
+}
+
+@if (Model.Accounts.Count == 0)
+{
+    <p class="muted">No accounts added.</p>
+}
+else
+{
+    <ul class="accounts">
+        @foreach (var a in Model.Accounts)
+        {
+            <li class="@AccountColor.CssClass(a.Color)">
+                <span class="swatch"></span>
+                <a href="/@a.Slug/">@a.Slug</a>
+                <span class="muted">@a.Email</span>
+            </li>
+        }
+    </ul>
+}
+
+@if (Model.OAuthConfigured)
+{
+    <p><a href="/accounts/add">Add an account</a></p>
+}

@@ -1,0 +1,22 @@
+/* One small stylesheet (ARCHITECTURE.md 11). No web fonts. */
+:root { --accent: #1a73e8; --muted: #5f6368; --line: #dadce0; }
+* { box-sizing: border-box; }
+body { margin: 0; font: 14px/1.45 system-ui, sans-serif; color: #202124; background: #fff; }
+header { display: flex; align-items: center; gap: 12px; padding: 8px 16px; border-bottom: 3px solid var(--accent); }
+header a { color: inherit; text-decoration: none; font-weight: 600; }
+main { padding: 16px; max-width: 760px; }
+h1 { font-size: 20px; margin: 0 0 12px; }
+a { color: var(--accent); }
+.muted { color: var(--muted); }
+.error { color: #b3261e; }
+ul.accounts { list-style: none; padding: 0; }
+ul.accounts li { padding: 8px 0; border-bottom: 1px solid var(--line); display: flex; gap: 10px; align-items: center; }
+.swatch { width: 12px; height: 12px; border-radius: 50%; display: inline-block; }
+form.inline { display: flex; gap: 8px; align-items: center; margin: 12px 0; }
+input[type=text] { padding: 6px 8px; font: inherit; border: 1px solid var(--line); border-radius: 4px; }
+button { padding: 6px 14px; font: inherit; border: 1px solid var(--accent); background: var(--accent); color: #fff; border-radius: 4px; cursor: pointer; }
+code, pre { font-family: ui-monospace, monospace; font-size: 13px; }
+/* Account colours (AccountStore palette). Classes, because the app CSP forbids inline styles. */
+.c-1a73e8 { --accent: #1a73e8; } .c-d93025 { --accent: #d93025; } .c-188038 { --accent: #188038; }
+.c-e37400 { --accent: #e37400; } .c-9334e6 { --accent: #9334e6; } .c-007b83 { --accent: #007b83; }
+.swatch { background: var(--accent); }

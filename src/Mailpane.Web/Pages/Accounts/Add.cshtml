@@ -1,0 +1,27 @@
+@page "/accounts/add"
+@model AddModel
+@{
+    ViewData["Title"] = "Add account - mailpane";
+}
+<h1>Add an account</h1>
+
+@if (!Model.OAuthConfigured)
+{
+    <p class="error">No OAuth client yet. Follow <code>docs/OAUTH_SETUP.md</code> parts 1 to 4 first.</p>
+}
+else
+{
+    @if (Model.Message is not null)
+    {
+        <p class="error">@Model.Message</p>
+    }
+    <p>Choose a short name for the account. It becomes the address: <code>http://localhost:8425/<em>name</em>/</code></p>
+    <form class="inline" method="get" action="/accounts/add">
+        <input type="text" name="slug" value="@Model.Slug" placeholder="work" required
+               maxlength="@AccountSlug.MaxLength" pattern="[a-z0-9]+(-[a-z0-9]+)*" autofocus>
+        <button type="submit">Continue to Google</button>
+    </form>
+    <p class="muted">Lowercase letters, digits and hyphens. On Google's page, pick the Gmail account you mean:
+        if several are signed in, this is where it is easy to choose the wrong one.
+        Google will warn that the app is unverified; choose Advanced, then Go to mailpane.</p>
+}

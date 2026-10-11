@@ -172,6 +172,7 @@ Notes:
 - A thread is unread when `thread_labels` has a row for `UNREAD`.
 - The list view for a label is one indexed query on `thread_labels` joined to `threads`.
 - No bodies, no attachments (D-007).
+- Implemented with two extra indexes, `messages (thread_id)` and `thread_labels (thread_id)`, for recomputing a thread's labels and for cascading deletes. Foreign keys are switched on per connection (S1).
 - A `schema_version` mismatch on startup drops and recreates the cache. There are no cache migrations.
 
 ## 6. Sync
@@ -289,6 +290,8 @@ Referrer-Policy: no-referrer
 
 All text from email (subjects, names, snippets) is HTML-encoded by Razor's default encoding. Never use `Html.Raw` on mail data.
 
+Inline `style` attributes are blocked by this CSP too. Per-account colours are therefore CSS classes (`.c-1a73e8` and so on, one per palette entry in `AccountStore`), not inline styles (S1).
+
 htmx is served from `/static`, not a CDN. Under this CSP it needs two settings in its `htmx-config` meta tag: `includeIndicatorStyles: false` (it otherwise injects a `<style>` element) and `allowEval: false`. Do not use `hx-on` or `js:` values. Check both setting names against the htmx version in use.
 
 ## 8. Quota limiter
@@ -300,6 +303,8 @@ One token bucket per account (D-013).
 - Two priorities: interactive (a request the user is waiting on) and background (sync). Background waits whenever an interactive call is queued.
 - On HTTP 429, or 403 with a rate-limit reason, apply truncated exponential backoff with jitter (1 s, 2 s, 4 s ... capped at 32 s) and empty the bucket.
 - The limiter logs units spent per minute per account at debug level. No message content in logs.
+- The Google library's own retry of HTTP 503 is switched off (`ExponentialBackOffPolicy.None`), because those retries would spend units the limiter never saw. The gateway retries rate-limit errors itself after taking units from the limiter again (S1).
+- While backing off, the bucket does not refill. Rate-limit reports that arrive during a backoff come from calls already in flight and do not escalate it.
 
 At the per-user cap, three accounts cannot exceed 3 x 6,000 x 1,440 = 25,920,000 units a day, well under the 80,000,000 daily billing threshold. No daily budget is needed.
 
@@ -325,6 +330,8 @@ Setup steps are in `OAUTH_SETUP.md`. Design:
 | Email content triggering GETs to this app | GET never mutates |
 | Token theft from disk | File mode 600; rely on disk encryption |
 | Another local user or process | **Not defended.** Accepted for a single-user machine (D-011) |
+
+Log filtering is part of this model: ASP.NET Core's request log at Information level records full URLs, which carry OAuth codes and, from S5, search queries. `Microsoft.AspNetCore` is held at Warning in code, not only in `appsettings.json`, and the content root is pinned to the binary's directory so the configuration loads whatever the working directory is (S1).
 
 If the browser resolves `localhost` to `::1` first and the page fails to load, bind `[::1]` as well; both are loopback.
 

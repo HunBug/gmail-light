@@ -23,7 +23,7 @@ It does not matter which Google account owns the Cloud project. The client ID id
 
 Open **Google Auth Platform** (older consoles: **APIs & Services > OAuth consent screen**).
 
-4. **Branding:** app name `mailpane`, your address as support email and developer contact.
+4. **Branding:** app name `mailpane`, your address as support email and developer contact. The logo uploaded there is `src/Mailpane.Web/wwwroot/logo.png`, which the app also uses as its favicon.
 5. **Audience:** user type **External**.
 6. **Data Access:** add the scope `https://www.googleapis.com/auth/gmail.readonly`. Nothing else for milestone 1.
 

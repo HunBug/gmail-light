@@ -1,0 +1,23 @@
+@* Never use Html.Raw on anything that came from mail (ARCHITECTURE.md 7.4). *@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>@ViewData["Title"]</title>
+    <link rel="icon" type="image/png" href="/static/logo.png">
+    <link rel="stylesheet" href="/static/app.css">
+</head>
+<body class="@ViewData["AccountClass"]">
+    <header>
+        <a href="/">mailpane</a>
+        @if (ViewData["Slug"] is string slug)
+        {
+            <span class="swatch"></span>
+            <a href="/@slug/">@slug</a>
+        }
+    </header>
+    <main>
+        @RenderBody()
+    </main>
+</body>
+</html>
